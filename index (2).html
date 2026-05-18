@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Services — Team Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Warm light palette inspired by attached deck */
+  --bg: #ffffff;
+  --surface: #faf9f7;
+  --surface2: #f4f2ee;
+  --border: #ece9e3;
+  --border2: #d9d5cd;
+  --text: #1a1a1a;
+  --muted: #63666A;
+  --muted2: #8b8e92;
+  --accent: #EB3300;        /* primary red-orange */
+  --accent2: #FF671F;       /* orange */
+  --accent3: #FF9E1B;       /* amber */
+  --accent-soft: rgba(235,51,0,0.08);
+  --accent-tint: rgba(235,51,0,0.04);
+  --tick: #EB3300;
+  --tick-bg: rgba(235,51,0,0.10);
+  --tick-border: rgba(235,51,0,0.45);
+  --card-shadow: 0 24px 60px -20px rgba(40,20,10,0.18), 0 8px 18px -10px rgba(40,20,10,0.10);
+  --col-w: 140px;
+  --acc-w: 230px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', 'Aptos', -apple-system, 'Segoe UI', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+#nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2rem; height: 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface); flex-shrink: 0;
+}
+#nav-left { display: flex; align-items: center; gap: 12px; }
+#slide-counter { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; font-weight: 500; }
+#live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); animation: pulse 2s ease-in-out infinite;
+}
+#live-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+#nav-right { display: flex; align-items: center; gap: 8px; }
+.nav-btn {
+  background: #fff; border: 1px solid var(--border2);
+  color: var(--text); padding: 6px 14px; border-radius: 6px;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.nav-btn:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.nav-btn:disabled { opacity: 0.32; cursor: default; }
+.nav-btn:disabled:hover { background: #fff; border-color: var(--border2); color: var(--text); }
+.nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.nav-btn.primary:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+/* PROGRESS */
+#progress { height: 2px; background: var(--border); flex-shrink: 0; }
+#pbar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); width: 0%; transition: width 0.35s ease; }
+
+/* SLIDES */
+#slides { flex: 1; overflow: hidden; position: relative; }
+.slide {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.slide.active { opacity: 1; pointer-events: all; }
+
+/* Title-alignment override (driven by Tweaks panel) */
+body.titles-left .slide-service { text-align: left; padding-left: 5rem; padding-right: 5rem; }
+body.titles-left .slide-service .description { margin-left: 0; }
+body.titles-left .slide-service .bullets { margin-left: 0; }
+body.titles-left .matrix-slide-title { align-items: flex-start; padding-left: 1.5rem; }
+body.titles-left .matrix-slide-title h2,
+body.titles-left .matrix-slide-title p { text-align: left; }
+body.titles-left .ideas-header { text-align: left; padding-left: 1.5rem; }
+
+/* IMAGE SLIDE (full-bleed PNG) */
+.slide-image {
+  background: #ffffff;
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.slide-image img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* TITLE SLIDE */
+.slide-title {
+  background:
+    radial-gradient(120% 80% at 12% 18%, #FFB341 0%, transparent 55%),
+    radial-gradient(110% 90% at 88% 86%, #C81C00 0%, transparent 55%),
+    linear-gradient(135deg, #EB3300 0%, #FF671F 45%, #FF9E1B 100%);
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0 5rem 5rem;
+}
+.slide-title::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 90% at 25% 50%, rgba(255,255,255,0.15), transparent 60%),
+    radial-gradient(50% 70% at 80% 30%, rgba(255,180,80,0.35), transparent 60%);
+  pointer-events: none;
+}
+.slide-title .eyebrow {
+  position: relative;
+  font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.85); font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+.slide-title h1 {
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(2.6rem, 5.5vw, 4.6rem);
+  line-height: 1.05; letter-spacing: -0.015em;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+.slide-divider {
+  position: relative;
+  width: 56px; height: 3px;
+  background: #ffffff;
+  margin: 0 0 1.5rem;
+  border-radius: 2px;
+}
+.slide-title .sub {
+  position: relative;
+  font-size: 1.05rem; color: rgba(255,255,255,0.9);
+  text-align: left; max-width: 520px; line-height: 1.55;
+  font-weight: 400;
+}
+
+/* SERVICE INTRO SLIDE */
+.slide-service { padding: 3rem 6rem; text-align: center; }
+.slide-service .service-tag {
+  display: inline-block; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: #ffffff; background: var(--accent);
+  padding: 5px 14px; border-radius: 999px; margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+.slide-service h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+  line-height: 1.08; margin-bottom: 1.75rem;
+  font-weight: 700; letter-spacing: -0.015em;
+  color: var(--text);
+}
+.slide-service .description {
+  font-size: 1.05rem; line-height: 1.7; color: var(--muted);
+  max-width: 620px; margin: 0 auto 2.25rem;
+  font-weight: 400;
+}
+.slide-service .bullets { display: flex; flex-direction: column; gap: 0.65rem; max-width: 520px; margin: 0 auto; }
+.slide-service .bullet {
+  display: flex; align-items: flex-start; gap: 0.85rem;
+  font-size: 0.95rem; color: var(--text); line-height: 1.5; text-align: left;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px -4px rgba(40,20,10,0.08);
+}
+.slide-service .bullet::before {
+  content: ''; flex-shrink: 0;
+  width: 6px; height: 6px; margin-top: 8px;
+  background: var(--accent); border-radius: 50%;
+}
+
+/* MATRIX SLIDE */
+.slide-matrix {
+  padding: 0 2.5rem;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.matrix-slide-title {
+  width: 100%;
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: 2rem 0 3rem;
+  flex-shrink: 0;
+}
+.matrix-slide-title h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin-bottom: 0.3rem; text-align: center;
+  font-weight: 700; letter-spacing: -0.01em;
+  color: var(--text);
+}
+.matrix-slide-title p { font-size: 15px; color: var(--muted); text-align: left; }
+.matrix-slide-title h2 { text-align: left; }
+
+.matrix-outer {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: var(--card-shadow);
+}
+table.matrix {
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+table.matrix col.acc-col { width: var(--acc-w); }
+table.matrix col.svc-col { width: var(--col-w); }
+
+table.matrix thead th {
+  background: var(--surface2);
+  padding: 11px 4px;
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--border2);
+  text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+table.matrix thead th.acc-hdr { text-align: left; padding-left: 14px; }
+table.matrix thead th.hl { color: #ffffff !important; background: var(--accent) !important; }
+
+table.matrix tbody td {
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  height: 34px; text-align: center; vertical-align: middle;
+}
+table.matrix tbody td:last-child { border-right: none; }
+table.matrix tbody tr:last-child td { border-bottom: none; }
+table.matrix tbody td.acc-cell {
+  text-align: left; padding: 0 8px 0 14px;
+  font-size: 11.5px; color: var(--text); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; font-weight: 500;
+}
+table.matrix tbody td.hl { background: var(--accent-tint); }
+table.matrix tbody tr:hover td { background: rgba(235,51,0,0.025); }
+table.matrix tbody tr:hover td.hl { background: var(--accent-soft); }
+
+/* TICK BUTTON */
+.cell-btn {
+  width: 100%; height: 34px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.tick-box {
+  width: 20px; height: 20px; border-radius: 5px;
+  border: 1.5px solid var(--border2);
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s, border-color 0.12s;
+  font-size: 12px; color: transparent; line-height: 1;
+  pointer-events: none;
+}
+.cell-btn:hover .tick-box { border-color: var(--accent); }
+.cell-btn.ticked .tick-box {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+/* IDEA BOARD SLIDE */
+.slide-ideas {
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0 3vw;
+}
+.ideas-header {
+  width: 100%; text-align: center;
+  padding: 1.75rem 0 1.2rem; flex-shrink: 0;
+}
+.ideas-header h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem); margin-bottom: 0.3rem;
+  font-weight: 700; letter-spacing: -0.01em; color: var(--text);
+}
+.ideas-header p { font-size: 12px; color: var(--muted); }
+
+.ideas-columns {
+  display: flex; gap: 0; width: 100%;
+  flex: 1; overflow: hidden; min-height: 0;
+}
+.ideas-col {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 0 1.5rem 1rem; min-height: 0;
+}
+.ideas-col-divider {
+  width: 1px; background: var(--border2); flex-shrink: 0; margin: 0;
+}
+.ideas-col-header {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 0.9rem; flex-shrink: 0;
+}
+
+.ideas-input-row {
+  display: flex; gap: 8px; margin-bottom: 1rem; flex-shrink: 0;
+}
+.ideas-input-row input {
+  flex: 1; background: #fff;
+  border: 1px solid var(--border2); border-radius: 8px;
+  color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 12px; padding: 9px 12px; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.ideas-input-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.ideas-input-row input::placeholder { color: var(--muted2); }
+.ideas-input-row button {
+  background: var(--accent); border: none; border-radius: 8px;
+  color: #fff; font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 600;
+  padding: 9px 16px; cursor: pointer; transition: background 0.15s; flex-shrink: 0;
+}
+.ideas-input-row button:hover { background: var(--accent2); }
+
+.ideas-board {
+  display: flex; flex-direction: column; gap: 8px;
+  overflow-y: auto; flex: 1;
+}
+.idea-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 32px 11px 14px;
+  font-size: 12.5px; line-height: 1.5; color: var(--text);
+  word-break: break-word;
+  animation: cardIn 0.18s ease;
+  position: relative; flex-shrink: 0;
+  box-shadow: 0 2px 8px -4px rgba(40,20,10,0.10);
+}
+.idea-card .del-btn {
+  position: absolute; top: 7px; right: 9px;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted2); font-size: 15px; line-height: 1;
+  padding: 0; opacity: 0; transition: opacity 0.1s, color 0.1s;
+}
+.idea-card:hover .del-btn { opacity: 1; }
+.idea-card .del-btn:hover { color: var(--accent); }
+@keyframes cardIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+#key-hint {
+  position: fixed; bottom: 10px; right: 16px;
+  font-size: 10px; color: var(--muted2); opacity: 0.4; pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div id="nav">
+  <div id="nav-left">
+    <span id="slide-counter">1 / 11</span>
+    <div id="live-dot"></div>
+    <span id="live-label">Live sync</span>
+  </div>
+  <div id="nav-right">
+    <button class="nav-btn" id="btn-reset">Reset ticks</button>
+    <button class="nav-btn" id="btn-prev" disabled>← Prev</button>
+    <button class="nav-btn primary" id="btn-next">Done</button>
+  </div>
+</div>
+<div id="progress"><div id="pbar"></div></div>
+
+<div id="slides">
+
+  <!-- 0: Title -->
+  <div class="slide slide-title active" data-idx="0">
+    <div class="eyebrow">DIGITAL EU</div>
+    <h1>Account development
+planning</h1>
+    <div class="slide-divider"></div>
+    <p class="sub">May 2026</p>
+  </div>
+
+  <!-- 1: 2026 roadmap (image) -->
+  <div class="slide slide-image" data-idx="1">
+    <img src="Slide2.png" alt="2026 roadmap" />
+  </div>
+
+  <!-- 2: Strategic priority offerings 2026 (image) -->
+  <div class="slide slide-image" data-idx="2">
+    <img src="Slide3.png" alt="Strategic priority offerings for 2026" />
+  </div>
+
+  <!-- 3: Full matrix overview -->
+  <div class="slide slide-matrix" data-idx="3">
+    <div class="matrix-slide-title">
+      <h2 style="text-align: left">Account matrix</h2>
+      <p style="text-align: left">Where are we already, and where are the opportunities?  (tick the boxes)</p>
+    </div>
+    <div class="matrix-outer" id="mo-all"></div>
+  </div>
+
+  <!-- 5: Predictive Planning deep-dive (image set) -->
+  <div class="slide slide-image" data-idx="5.1"><img src="S5-01.png" alt="Impact, accelerated — Anticipating Change to Drive Smarter Strategic Decisions" /></div>
+  <div class="slide slide-image" data-idx="5.2"><img src="S5-02.png" alt="Introducing Predictive Planning — a new approach to strategic foresight" /></div>
+  <div class="slide slide-image" data-idx="5.3"><img src="S5-03.png" alt="One methodology, four core products — Sense, Predict, Forecast, Test" /></div>
+  <div class="slide slide-image" data-idx="5.4"><img src="S5-04.png" alt="Sense — Predictive Pulse Dashboard" /></div>
+  <div class="slide slide-image" data-idx="5.5"><img src="S5-05.png" alt="Predictive Pulse Dashboard — what it is and how it shapes better decisions" /></div>
+  <div class="slide slide-image" data-idx="5.6"><img src="S5-06.png" alt="Predict — Clinical Trial Predictor" /></div>
+  <div class="slide slide-image" data-idx="5.7"><img src="S5-07.png" alt="Clinical Trial Predictor — what it is and how it shapes better decisions" /></div>
+  <div class="slide slide-image" data-idx="5.8"><img src="S5-08.png" alt="Forecast — Predictive Surveys" /></div>
+  <div class="slide slide-image" data-idx="5.9"><img src="S5-09.png" alt="Predictive Surveys — what it is and how it shapes better decisions" /></div>
+  <div class="slide slide-image" data-idx="5.10"><img src="S5-10.png" alt="Where this is heading — Human + AI augmentation" /></div>
+  <div class="slide slide-image" data-idx="5.11"><img src="S5-11.png" alt="Test — Resonance Read" /></div>
+  <div class="slide slide-image" data-idx="5.12"><img src="S5-12.png" alt="Resonance Read — what it is and how it shapes better decisions" /></div>
+  <div class="slide slide-image" data-idx="5.13"><img src="S5-13.png" alt="Predictive tools, unified or connected solutions leading to clear decisions" /></div>
+
+  <!-- 3: Matrix — Insight highlighted -->
+  <div class="slide slide-matrix" data-idx="3">
+    <div class="matrix-slide-title">
+      <h2>Predictive - account opportunities</h2>
+      <p>Which accounts could benefit? Click to mark.</p>
+    </div>
+    <div class="matrix-outer" id="mo-0"></div>
+  </div>
+
+  <!-- 20: Bringing CRM to life with prototype IDAs (image set) -->
+  <div class="slide slide-image" data-idx="20.1"><img src="S20-01.png" alt="Bringing CRM to life with prototype IDAs — Show vs Tell in a rep/HCP environment" /></div>
+  <div class="slide slide-image" data-idx="20.2"><img src="S20-02.png" alt="Why this matters — IDAs as a CRM-connected flow" /></div>
+  <div class="slide slide-image" data-idx="20.3"><img src="S20-03.png" alt="What the prototype demonstrates" /></div>
+  <div class="slide slide-image" data-idx="20.4"><img src="S20-04.png" alt="Why it is more than a demo — the demo itself becomes a consultancy tool" /></div>
+  <div class="slide slide-image" data-idx="20.5"><img src="S20-05.png" alt="Veeva CRM demo — perspective of rep detailing HCP remotely" /></div>
+  <div class="slide slide-image" data-idx="20.6"><img src="S20-06.png" alt="How we measure success" /></div>
+  <div class="slide slide-image" data-idx="20.7"><img src="S20-07.png" alt="What comes next — MedComms / MSL version" /></div>
+  <div class="slide slide-image" data-idx="20.8"><img src="S20-08.png" alt="Questions? — Cliff Walton, EU Director, Digital (Omnichannel)" /></div>
+
+  <!-- 5: Matrix — Omni highlighted -->
+  <div class="slide slide-matrix" data-idx="5">
+    <div class="matrix-slide-title">
+      <h2>Prototypes — Account Opportunities</h2>
+      <p>Which accounts could benefit? Click to mark.</p>
+    </div>
+    <div class="matrix-outer" id="mo-1"></div>
+  </div>
+
+  <!-- 6: Innovation/AI deep-dive (image set) -->
+  <div class="slide slide-image" data-idx="6.1"><img src="S9-01.png" alt="A step-change in what we can deliver" /></div>
+  <div class="slide slide-image" data-idx="6.2"><img src="S9-02.png" alt="New value-add services through technical capabilities" /></div>
+  <div class="slide slide-image" data-idx="6.3"><img src="S9-03.png" alt="Overview of core capabilities" /></div>
+  <div class="slide slide-image" data-idx="6.4"><img src="S9-04.png" alt="Connecting capabilities into tailored value-add services" /></div>
+  <div class="slide slide-image" data-idx="6.5"><img src="S9-05.png" alt="Scientific and strategic expertise embedded at every stage" /></div>
+  <div class="slide slide-image" data-idx="6.6"><img src="S9-06.png" alt="Case study — transforming social monitoring into recommendations" /></div>
+  <div class="slide slide-image" data-idx="6.9"><img src="S9-09.png" alt="Thought starters for new value-add AI-powered workflows" /></div>
+
+  <!-- 7: Matrix — Innovation/AI highlighted -->
+  <div class="slide slide-matrix" data-idx="7">
+    <div class="matrix-slide-title">
+      <h2>Innovation / AI — Account Opportunities</h2>
+      <p>Which accounts could benefit? Click to mark.</p>
+    </div>
+    <div class="matrix-outer" id="mo-2"></div>
+  </div>
+
+  <!-- 8: Idea board -->
+  <div class="slide slide-ideas" data-idx="8">
+    <div class="ideas-header">
+      <h2>From insight to action</h2>
+      <p>First, why don't ADPs lead to action? Then, how do we solve it?</p>
+    </div>
+    <div class="ideas-columns">
+      <div class="ideas-col">
+        <div class="ideas-col-header">Why don't ADPs lead to action?</div>
+        <div class="ideas-input-row">
+          <input type="text" id="barrier-input" placeholder="Add a barrier…" maxlength="140" autocomplete="off" />
+          <button type="button" id="barrier-submit">Add</button>
+        </div>
+        <div class="ideas-board" id="barriers-board"></div>
+        <div style="margin-top:1rem;flex-shrink:0;">
+          <button type="button" id="reveal-solutions" class="nav-btn primary" style="font-size:12px;padding:7px 18px;">Reveal solutions column →</button>
+        </div>
+      </div>
+      <div class="ideas-col-divider" id="col-divider" style="opacity:0;transition:opacity 0.4s ease;"></div>
+      <div class="ideas-col" id="solutions-col" style="opacity:0;pointer-events:none;transition:opacity 0.4s ease;">
+        <div class="ideas-col-header">How do we solve this?</div>
+        <div class="ideas-input-row">
+          <input type="text" id="solution-input" placeholder="Add a solution…" maxlength="140" autocomplete="off" />
+          <button type="button" id="solution-submit">Add</button>
+        </div>
+        <div class="ideas-board" id="solutions-board"></div>
+        <div style="margin-top:1rem;flex-shrink:0;">
+          <button type="button" id="export-btn" class="nav-btn" style="font-size:12px;padding:7px 18px;">↓ Export to Excel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="key-hint">← → arrow keys</div>
+
+<div id="tweaks-root"></div>
+
+<!-- Tweaks panel: React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "titleAlign": "left",
+  "accentColor": "#EB3300"
+}/*EDITMODE-END*/;
+
+function TweaksApp() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    document.body.classList.toggle('titles-left', t.titleAlign === 'left');
+  }, [t.titleAlign]);
+
+  React.useEffect(() => {
+    document.documentElement.style.setProperty('--accent', t.accentColor);
+  }, [t.accentColor]);
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection title="Layout">
+        <TweakRadio
+          label="Title alignment"
+          value={t.titleAlign}
+          options={[
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+          ]}
+          onChange={(v) => setTweak('titleAlign', v)}
+        />
+      </TweakSection>
+      <TweakSection title="Color">
+        <TweakColor
+          label="Accent"
+          value={t.accentColor}
+          options={['#EB3300', '#FF671F', '#FF9E1B', '#002E5D', '#0076A5']}
+          onChange={(v) => setTweak('accentColor', v)}
+        />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+const tweaksRoot = ReactDOM.createRoot(document.getElementById('tweaks-root'));
+tweaksRoot.render(<TweaksApp />);
+</script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue, set, push, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const app = initializeApp({ databaseURL: "https://newsagent-d4a31-default-rtdb.europe-west1.firebasedatabase.app/" });
+const db = getDatabase(app);
+const fbRef = ref(db, 'svc-matrix-v2');
+const barriersRef = ref(db, 'svc-barriers-v1');
+const solutionsRef = ref(db, 'svc-solutions-v1');
+
+const ACCOUNTS = [
+  'AZ Forxiga','Abbvie Migraine','Abbvie Eyecare','Merck ApTOLL',
+  'Cytokinetics','Servier Glioma','Bavarian Nordic','Insmed',
+  'Bayer Asundexian','UCB Bimzelx','UCB Immunology','Bayer Acoramidis',
+  'ISBA','Menarini','Pfizer EU','Alfasigma','GSK Shingles'
+];
+const SERVICES = ['Insight','Omni / strategy','Innovation / AI','Analytics','Predictive','Veeva'];
+
+function fbKey(ai, si) { return `r${ai}_c${si}`; }
+
+let state = {};
+
+function buildMatrix(containerId, hlCol, hideCols, colLabels) {
+  const outer = document.getElementById(containerId);
+  if (!outer || outer.dataset.built) return;
+  outer.dataset.built = '1';
+  const hidden = new Set(hideCols || []);
+  const labels = colLabels || {};
+
+  const tbl = document.createElement('table');
+  tbl.className = 'matrix';
+
+  const cg = document.createElement('colgroup');
+  const c0 = document.createElement('col'); c0.className = 'acc-col'; cg.appendChild(c0);
+  SERVICES.forEach((_, si) => { if (hidden.has(si)) return; const c = document.createElement('col'); c.className = 'svc-col'; cg.appendChild(c); });
+  tbl.appendChild(cg);
+
+  const thead = document.createElement('thead');
+  const hrow = document.createElement('tr');
+  const th0 = document.createElement('th'); th0.className = 'acc-hdr'; th0.textContent = 'Account';
+  hrow.appendChild(th0);
+  SERVICES.forEach((s, si) => {
+    if (hidden.has(si)) return;
+    const th = document.createElement('th');
+    th.textContent = (si in labels) ? labels[si] : s;
+    if (hlCol !== null && si === hlCol) th.className = 'hl';
+    hrow.appendChild(th);
+  });
+  thead.appendChild(hrow);
+  tbl.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  ACCOUNTS.forEach((acc, ai) => {
+    const tr = document.createElement('tr');
+    const td0 = document.createElement('td'); td0.className = 'acc-cell'; td0.textContent = acc;
+    tr.appendChild(td0);
+
+    SERVICES.forEach((svc, si) => {
+      if (hidden.has(si)) return;
+      const td = document.createElement('td');
+      if (hlCol !== null && si === hlCol) td.className = 'hl';
+
+      const btn = document.createElement('button');
+      btn.className = 'cell-btn';
+      btn.type = 'button';
+      btn.dataset.ai = String(ai);
+      btn.dataset.si = String(si);
+
+      const box = document.createElement('span');
+      box.className = 'tick-box';
+      box.textContent = '✓';
+      btn.appendChild(box);
+
+      const k = fbKey(ai, si);
+      if (state[k]) btn.classList.add('ticked');
+
+      btn.addEventListener('click', () => {
+        const key = fbKey(btn.dataset.ai, btn.dataset.si);
+        state[key] = !state[key];
+        set(fbRef, { ...state });
+      });
+
+      td.appendChild(btn);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  tbl.appendChild(tbody);
+  outer.appendChild(tbl);
+}
+
+function applyState() {
+  document.querySelectorAll('.cell-btn').forEach(btn => {
+    const k = fbKey(btn.dataset.ai, btn.dataset.si);
+    btn.classList.toggle('ticked', !!state[k]);
+  });
+}
+
+onValue(fbRef, snap => {
+  state = snap.val() || {};
+  applyState();
+});
+
+// Build all matrices immediately
+buildMatrix('mo-all', null, [4, 5]);
+buildMatrix('mo-0', null, [5]);
+buildMatrix('mo-1', null, null, { 5: 'Prototypes' });
+buildMatrix('mo-2', null, null, { 5: 'Prototypes' });
+
+// Navigation
+const slides = Array.from(document.querySelectorAll('.slide'));
+const total = slides.length;
+let cur = 0;
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const counter = document.getElementById('slide-counter');
+const pbar = document.getElementById('pbar');
+
+function goTo(n) {
+  if (n < 0 || n >= total) return;
+  slides[cur].classList.remove('active');
+  cur = n;
+  slides[cur].classList.add('active');
+  counter.textContent = `${cur + 1} / ${total}`;
+  btnPrev.disabled = cur === 0;
+  btnNext.textContent = cur === total - 1 ? 'Done' : 'Next →';
+  btnNext.disabled = cur === total - 1;
+  pbar.style.width = (cur / (total - 1) * 100) + '%';
+}
+
+btnNext.addEventListener('click', () => goTo(cur + 1));
+btnPrev.addEventListener('click', () => goTo(cur - 1));
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(cur + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(cur - 1);
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (confirm('Clear all ticks and ideas for everyone?')) { state = {}; set(fbRef, null); set(barriersRef, null); set(solutionsRef, null); }
+});
+
+// Idea board — two columns
+
+let barrierState = {};
+let solutionState = {};
+
+function makeBoard(fbColRef, boardEl, pathName, cache) {
+  onValue(fbColRef, snap => {
+    const data = snap.val() || {};
+    if (cache === 'barriers') barrierState = data;
+    if (cache === 'solutions') solutionState = data;
+    boardEl.innerHTML = '';
+    Object.entries(data).forEach(([key, text]) => {
+      const card = document.createElement('div');
+      card.className = 'idea-card';
+      card.textContent = text;
+      const del = document.createElement('button');
+      del.className = 'del-btn';
+      del.textContent = '×';
+      del.title = 'Remove';
+      del.addEventListener('click', () => remove(ref(db, `${pathName}/${key}`)));
+      card.appendChild(del);
+      boardEl.appendChild(card);
+    });
+  });
+}
+
+function makeInput(inputEl, submitEl, fbColRef) {
+  function submit() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    push(fbColRef, text);
+    inputEl.value = '';
+    inputEl.focus();
+  }
+  submitEl.addEventListener('click', submit);
+  inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+}
+
+makeBoard(barriersRef, document.getElementById('barriers-board'), 'svc-barriers-v1', 'barriers');
+makeBoard(solutionsRef, document.getElementById('solutions-board'), 'svc-solutions-v1', 'solutions');
+makeInput(document.getElementById('barrier-input'), document.getElementById('barrier-submit'), barriersRef);
+makeInput(document.getElementById('solution-input'), document.getElementById('solution-submit'), solutionsRef);
+
+document.getElementById('reveal-solutions').addEventListener('click', () => {
+  const col = document.getElementById('solutions-col');
+  const div = document.getElementById('col-divider');
+  const btn = document.getElementById('reveal-solutions');
+  col.style.opacity = '1'; col.style.pointerEvents = 'all';
+  div.style.opacity = '1';
+  btn.style.display = 'none';
+});
+
+document.getElementById('export-btn').addEventListener('click', () => {
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: Matrix
+  const matrixRows = [['Account', ...SERVICES]];
+  ACCOUNTS.forEach((acc, ai) => {
+    const row = [acc];
+    SERVICES.forEach((svc, si) => { row.push(state[fbKey(ai, si)] ? 1 : 0); });
+    matrixRows.push(row);
+  });
+  const ws1 = XLSX.utils.aoa_to_sheet(matrixRows);
+  // Column widths
+  ws1['!cols'] = [{ wch: 22 }, ...SERVICES.map(() => ({ wch: 16 }))];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Matrix');
+
+  // Sheet 2: Brainstorm
+  const bSnap = Object.values(barrierState);
+  const sSnap = Object.values(solutionState);
+  const maxLen = Math.max(bSnap.length, sSnap.length, 1);
+  const brainstormRows = [['Why don\'t ADPs lead to action?', 'How do we solve this?']];
+  for (let i = 0; i < maxLen; i++) {
+    brainstormRows.push([bSnap[i] || '', sSnap[i] || '']);
+  }
+  const ws2 = XLSX.utils.aoa_to_sheet(brainstormRows);
+  ws2['!cols'] = [{ wch: 40 }, { wch: 40 }];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Brainstorm');
+
+  XLSX.writeFile(wb, 'ADP-session-output.xlsx');
+});
+
+goTo(0);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>
